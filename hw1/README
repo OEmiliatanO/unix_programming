@@ -1,0 +1,3 @@
+please change directory into the desired directory. 
+
+Type `Make dep all clean`. Then run `./test.sh`
