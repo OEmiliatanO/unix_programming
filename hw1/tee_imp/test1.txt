@@ -1,13 +1,13 @@
 I love National Sun Yat-sen University, poor CSE
-total 48
--rw-r--r-- 1 emilia emilia    99 Sep 24 11:04 Makefile
--rwxr-xr-x 1 emilia emilia 16544 Sep 24 11:58 tee
--rw-r--r-- 1 emilia emilia  1553 Sep 24 11:58 tee.c
--rw-r--r-- 1 emilia emilia  3720 Sep 24 11:58 tee.o
--rwxr--r-- 1 emilia emilia  1612 Sep 24 11:59 test.sh
--rw-r--r-- 1 emilia emilia    49 Sep 24 11:59 test1.txt
--rw-r--r-- 1 emilia emilia    49 Sep 24 11:59 test2.txt
--rw-r--r-- 1 emilia emilia    49 Sep 24 11:59 test3.txt
-/home/emilia/unix_programming/hw1/tee
+total 52
+-rw-r--r-- 1 emilia emilia    99 Sep 24 19:02 Makefile
+-rwxr-xr-x 1 emilia emilia 16632 Sep 30 22:20 tee
+-rw-r--r-- 1 emilia emilia  1891 Sep 30 22:20 tee.c
+-rw-r--r-- 1 emilia emilia  4216 Sep 30 22:20 tee.o
+-rwxr-xr-x 1 emilia emilia  1612 Sep 24 19:02 test.sh
+-rw-r--r-- 1 emilia emilia    49 Sep 30 22:20 test1.txt
+-rw-r--r-- 1 emilia emilia    49 Sep 30 22:20 test2.txt
+-rw-r--r-- 1 emilia emilia    49 Sep 30 22:20 test3.txt
+/home/emilia/unix_programming/hw1/tee_imp
 I love National Sun Yat-sen University, poor CSE
 zzzzz

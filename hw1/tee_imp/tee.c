@@ -18,27 +18,28 @@ int pick_flags(const char *argu) {
 }
 
 int main(int argc, char *argv[]) {
-    FILE *files[argc - 1];
-	char filemode[] = "w";
+    int files[argc - 1];
+    memset(files, -1, sizeof(files));
+    int filemode = O_WRONLY | O_CREAT;
     char buffer[BUFFER_SIZE];
     size_t bytes_read;
 
 	int flags = 0;
-	for (int i = 1; i < argc; ++i)
-		flags |= pick_flags(argv[i]); // look for flags, use bitmap to record
-	filemode[0] = ((flags & 0x1) ? 'a' : 'w');
+    for (int i = 1; i < argc; ++i)
+		flags |= pick_flags(argv[i]); // Look for flags, use bitmap to record
+
+    if (flags != 0) filemode |= O_APPEND;
+    else            filemode |= O_TRUNC;
 
     if (argc < 2) {
         usage(argv[0]);
     }
 
     for (int i = 1; i < argc; i++) {
-		if (argv[i][0] == '-') { 
-			files[i - 1] = NULL; 
+		if (argv[i][0] == '-')
 			continue;
-		}
-        files[i - 1] = fopen(argv[i], filemode);
-        if (files[i - 1] == NULL) { // File errors
+        files[i - 1] = open(argv[i], filemode, 0644);
+        if (files[i - 1] == -1) { // File errors
 			sprintf(buffer, "Cannot open the file, %s", argv[i]);
             perror(buffer);
             exit(EXIT_FAILURE);
@@ -46,20 +47,27 @@ int main(int argc, char *argv[]) {
     }
 
 	// Read from the stdin
-    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, stdin)) > 0) {
+    while ((bytes_read = read(fileno(stdin), (void *)buffer, BUFFER_SIZE)) > 0) {
 		// Output to the stdout
-        fwrite(buffer, 1, bytes_read, stdout);
+        if (write(fileno(stdout), buffer, bytes_read) == -1) {
+            perror("Cannot write text to stdout.");
+            exit(EXIT_FAILURE);
+        }
         
 		// Also output to the files
         for (int i = 0; i < argc - 1; i++) {
-			if (files[i] == NULL) continue;
-            fwrite(buffer, 1, bytes_read, files[i]);
+			if (files[i] == -1) continue;
+            if (write(files[i], buffer, bytes_read) == -1) {
+                sprintf(buffer, "Cannot write to %s", argv[i+1]);
+                perror(buffer);
+                exit(EXIT_FAILURE);
+            }
         }
     }
 
     for (int i = 0; i < argc - 1; i++) {
-		if (files[i] == NULL) continue;
-        fclose(files[i]);
+		if (files[i] == -1) continue;
+        close(files[i]);
     }
 
     return 0;
