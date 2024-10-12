@@ -7,9 +7,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #include "shell.h"
 
+// deal with the zombie child process
+void sigchld_handler(int signum) {
+    (void) signum; // prevent the unused warning
+    pid_t pid;
+    while ((pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+        fprintf(stdout, "PID %d finished.\n", pid);
+    }
+}
+
 int main() {
+    // set signal handler
+    signal(SIGCHLD, sigchld_handler);
+
     char line[LONGLINE];
     char **myArgv;
 

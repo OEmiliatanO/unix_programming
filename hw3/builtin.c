@@ -39,19 +39,20 @@ static void bi_echo(char **argv) {
             return;
         }
         int write_size = strlen(argv[realN]) * sizeof(char);
-        if (fprintf(stdout, "%s\n", argv[realN]) != (write_size+1)) {
+        if (fprintf(stdout, "%s ", argv[realN]) != (write_size+1)) {
             perror("Cannot write to stdout.");
             return;
         }
     } else {
         for (int i = 1; argv[i] != NULL; ++i) {
             int write_size = strlen(argv[i]) * sizeof(char);
-            if (fprintf(stdout, "%s\n", argv[i]) != (write_size+1)) {
+            if (fprintf(stdout, "%s ", argv[i]) != (write_size+1)) {
                 perror("Cannot write to stdout.");
                 return;
             }
         }
     }
+    fprintf(stdout, "\n");
 }
 
 static void bi_exit(char **argv) {
@@ -74,7 +75,10 @@ static struct cmd {
 	/* Fill in code. */
 
 	{ "echo", bi_echo },		/* When "echo" is typed, bi_echo() executes.  */
-    { "exit", bi_exit },
+    { "exit", bi_exit }, 
+    { "quit", bi_exit }, 
+    { "bye",  bi_exit }, 
+    { "logout", bi_exit }, 
 	{ NULL, NULL }				/* NULL terminated. */
 };
 

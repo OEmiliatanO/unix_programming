@@ -36,7 +36,7 @@ char ** parse(char *line) {
   	 *
 	 * Fill in code.
 	 */
-    newArgv = (char **)malloc(sizeof(char*) * (count+1));
+    newArgv = (char **)malloc(sizeof(char*) * (count+1)); // one more for NULL
     newArgv[count-1] = (char *)malloc(sizeof(char) * (strlen(token)+1));
     strcpy(newArgv[count-1], token);
 
@@ -51,7 +51,7 @@ char ** parse(char *line) {
 	 */
     while ((token = strtok(NULL, delim)) != NULL) {
         ++count;
-        newArgv = realloc(newArgv, sizeof(char*) * (count+1));
+        newArgv = (char **)realloc(newArgv, sizeof(char*) * (count+1));
         newArgv[count-1] = (char *)malloc(sizeof(char) * (strlen(token)+1));
         strcpy(newArgv[count-1], token);
     }

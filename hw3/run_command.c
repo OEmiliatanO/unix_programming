@@ -53,10 +53,10 @@ void run_command(char **myArgv) {
             /* Run command in child process.
              * Fill in code.
 			 */
-            if (execvp(myArgv[0], myArgv) < 0)
-                perror("command error.");
+            execvp(myArgv[0], myArgv);
 
             /* Handle error return from exec */
+            perror("command error.");
 			exit(errno);
     }
 }
