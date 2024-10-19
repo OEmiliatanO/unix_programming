@@ -30,6 +30,11 @@ Process* create_process(pid_t pid, pid_t ppid, const char *cmd) {
     return proc;
 }
 
+void add_to_list(Process *proc) {
+    proc->next = process_list;
+    process_list = proc;
+}
+
 void add_child(Process *parent, Process *child) {
     if (!parent->children) {
         parent->children = child;
@@ -67,10 +72,8 @@ void read_process_status(pid_t pid) {
     }
     fclose(status_file);
 
-    if (ppid > 0) {
-        Process *proc = create_process(pid, ppid, cmd);
-        add_child(proc, proc);
-    }
+	Process *proc = create_process(pid, ppid, cmd);
+	add_to_list(proc);
 }
 
 void build_process_tree() {
@@ -99,6 +102,7 @@ void print_process_tree(Process *proc, int depth) {
         printf("  ");
     }
     printf("%d (%s)\n", proc->pid, proc->cmd);
+    
     Process *child = proc->children;
     while (child) {
         print_process_tree(child, depth + 1);
@@ -113,11 +117,49 @@ void free_process_tree(Process *proc) {
     }
 }
 
+void link_children(Process* cur) {
+	Process *potential_child = process_list;
+	Process *last = NULL;
+	Process *nex = potential_child ? potential_child->next : NULL;
+	while (potential_child) {
+		int added = 0;
+		if (potential_child->ppid == cur->pid && potential_child->pid != cur->pid) {
+			added = 1;
+			if (last) last->next = nex;
+			potential_child->next = NULL;
+			add_child(cur, potential_child);
+		}
+		if (!added) last = potential_child;
+		potential_child = nex;
+		if (potential_child) nex = potential_child->next;
+	}
+
+	for (Process* child = cur->children; child; child=child->next) link_children(child);
+}
+
 int main() {
     build_process_tree();
-    
+
+    Process *cur = process_list, *last = NULL;
+	// find pid = 1
+	while (cur && cur->pid != 1) {
+		last = cur;
+		cur = cur->next;
+	}
+	if (cur && cur->pid == 1) {
+		if (last) last->next = cur->next;
+		cur->next = process_list;
+		process_list = cur;
+	} else {
+		perror("Cannot find init process.");
+        exit(EXIT_FAILURE);
+	}
+
+    // Link children to their parents
+    link_children(cur);
+
     // Print process tree starting from init (PID 1)
-    Process *init_process = process_list; // Assuming the head is for PID 1
+    Process *init_process = process_list; 
     while (init_process && init_process->pid != 1) {
         init_process = init_process->next;
     }
