@@ -3,6 +3,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "shell.h"
 
 int is_background(char ** myArgv) {
@@ -17,5 +18,15 @@ int is_background(char ** myArgv) {
 	 *
 	 * Fill in code.
 	 */
+    
+    int i = 0;
+    while (myArgv[i] != NULL) ++i;
+
+    --i;
+    if (i > 0 && strcmp(myArgv[i], "&") == 0) {
+        myArgv[i] = NULL;
+        return TRUE;
+    }
+    return FALSE;
 
 }

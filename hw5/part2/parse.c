@@ -26,12 +26,18 @@ char ** parse(char *line) {
 	 *
 	 * Fill in code.
      */
+	token = strtok(line, delim);
+	if (token == NULL) return NULL;
+	++count;
 
 
   	/* Create array with room for first token.
   	 *
 	 * Fill in code.
 	 */
+	newArgv = (char **)malloc(sizeof(char *) * (count+1));
+	newArgv[count - 1] = (char *)malloc(sizeof(char) * (strlen(token)+1));
+	strcpy(newArgv[count-1], token);
 
 
   	/* While there are more tokens...
@@ -42,12 +48,18 @@ char ** parse(char *line) {
 	 * 
   	 * Fill in code.
 	 */
-
+	while ((token = strtok(NULL, delim)) != NULL) {
+		++count;
+		newArgv = (char **)realloc(newArgv, sizeof(char*) * (count+1));
+		newArgv[count-1] = (char *)malloc(sizeof(char) * (strlen(token)+1));
+		strcpy(newArgv[count-1], token);
+	}
 
   	/* Null terminate the array and return it.
 	 *
   	 * Fill in code.
 	 */
+	newArgv[count] = NULL;
 
   	return newArgv;
 }
@@ -66,4 +78,6 @@ void free_argv(char **oldArgv) {
 	 *
 	 * Fill in code.
 	 */
+	if (oldArgv == NULL) return;
+	while (oldArgv[i] != NULL) free(oldArgv[i++]);
 }

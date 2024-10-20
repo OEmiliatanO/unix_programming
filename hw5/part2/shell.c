@@ -9,6 +9,8 @@
 #include "shell.h"
 
 int main(int argc, char* argv[]) {
+	(void) argv; (void) argc; // To avoid the warning
+
 	char line[LONGLINE];
   	char **myArgv;
 

@@ -3,6 +3,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
@@ -48,8 +51,16 @@ void run_command(char **myArgv) {
     	case 0 :
 
       		/* Redirect input and update argv. */
+            if (redirect_in(myArgv) != 0) {
+                perror("redirect");
+                exit(errno);
+            }
 
       		/* Redirect output and update argv. */
+            if (redirect_out(myArgv) != 0) {
+                perror("redirect");
+                exit(errno);
+            }
 
       		pipe_and_exec(myArgv);
       		exit(errno);
