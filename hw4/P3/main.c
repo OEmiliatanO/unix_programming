@@ -63,8 +63,12 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    const char *filename = argv[1];
-    list_processes_with_file(filename);
+    char absolute_path[PATH_MAX];
+    if (realpath(argv[1], absolute_path) == NULL) {
+        fprintf(stderr, "Cannot obtain the absolute path.\n");
+        return EXIT_FAILURE;
+    }
+    list_processes_with_file(absolute_path);
 
     return 0;
 }
