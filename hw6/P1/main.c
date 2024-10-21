@@ -26,7 +26,6 @@ int main() {
     pid_t pid = fork();
 
     if (pid < 0) {
-        // Fork failed
         perror("fork failed");
         exit(1);
     }
@@ -38,12 +37,9 @@ int main() {
         close(pipe2[1]); // Close the writing end of pipe2 (parent reads from this pipe)
 
         while (1) {
-            // Read text from standard input
             printf("Enter some text: ");
             fgets(input, BUFFER_SIZE, stdin);
-
-            // Remove newline character from input
-            input[strcspn(input, "\n")] = 0;
+            input[strcspn(input, "\n")] = 0; // strip
 
             // Write the input text to the child process
             write(pipe1[1], input, strlen(input) + 1);
@@ -51,11 +47,9 @@ int main() {
             // Read the modified text from the child process
             read(pipe2[0], output, BUFFER_SIZE);
 
-            // Print the output received from the child
             printf("Uppercase: %s\n", output);
         }
 
-        // Close pipes
         close(pipe1[1]);
         close(pipe2[0]);
 
@@ -65,17 +59,16 @@ int main() {
         close(pipe2[0]); // Close the reading end of pipe2 (child writes to this pipe)
 
         while (1) {
-            // Read the input text from the parent process
+            // Read the input from parent
             read(pipe1[0], buffer, BUFFER_SIZE);
 
-            // Convert the text to uppercase
+            // Convert
             to_uppercase(buffer);
 
-            // Send the uppercase text back to the parent process
+            // Send back to parent
             write(pipe2[1], buffer, strlen(buffer) + 1);
         }
 
-        // Close pipes
         close(pipe1[0]);
         close(pipe2[1]);
     }
