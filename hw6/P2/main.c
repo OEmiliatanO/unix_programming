@@ -6,7 +6,7 @@ int main() {
     char buffer[1024];
 
     // Using popen() to run a command and read its output
-    fp = mypopen("ls -l", "r");
+    fp = mypopen("ls -la", "r");
     if (fp == NULL) {
         perror("popen failed");
         return 1;
