@@ -5,19 +5,20 @@ int main() {
     FILE *fp;
     char buffer[1024];
 
-    // Using popen() to run a command and read its output
+    // popen() runs a command
+	// read its output
     fp = mypopen("ls -la", "r");
     if (fp == NULL) {
         perror("popen failed");
         return 1;
     }
 
-    // Read the command output and print it to the console
+    // Read the command output
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
         printf("%s", buffer);
     }
 
-    // Close the stream and get the command's exit status
+    // Close the stream
     int status = mypclose(fp);
 	if (status < 0) {
 		fprintf(stderr, "Child exit abnormally\n");

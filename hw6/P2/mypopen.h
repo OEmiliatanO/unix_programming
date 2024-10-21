@@ -8,20 +8,20 @@
 
 #define MAX_OPEN_STREAMS 256
 
-// Structure to store file stream and associated child process PID
+// Structure to store file pointer and associated child process PID
 struct popen_entry {
     FILE *fp;
     pid_t pid;
 };
 
-static struct popen_entry popen_table[MAX_OPEN_STREAMS];  // Array to track open streams
+// Records of file pointer and PID
+static struct popen_entry popen_table[MAX_OPEN_STREAMS];
 
 FILE *mypopen(const char *command, const char *mode) {
-    int pipe_fd[2];  // Pipe file descriptors
+    int pipe_fd[2];
     pid_t pid;
     FILE *fp;
 
-    // Create a pipe
     if (pipe(pipe_fd) == -1) {
         perror("pipe");
         return NULL;
@@ -40,21 +40,21 @@ FILE *mypopen(const char *command, const char *mode) {
         if (strcmp(mode, "r") == 0) {
             // Parent reads from the pipe, child writes to stdout
             close(pipe_fd[0]);  // Close read end
-            dup2(pipe_fd[1], STDOUT_FILENO);  // Redirect stdout to pipe
-            close(pipe_fd[1]);  // Close the original pipe write end
+            dup2(pipe_fd[1], fileno(stdout));  // stdout <= write end
+            close(pipe_fd[1]);  // Close write end
         } else if (strcmp(mode, "w") == 0) {
             // Parent writes to the pipe, child reads from stdin
             close(pipe_fd[1]);  // Close write end
-            dup2(pipe_fd[0], STDIN_FILENO);  // Redirect stdin to pipe
-            close(pipe_fd[0]);  // Close the original pipe read end
+            dup2(pipe_fd[0], fileno(stdin));   // stdin  <= read end
+            close(pipe_fd[0]);  // Close read end
         } else {
-            fprintf(stderr, "Invalid mode %s\n", mode);
+            fprintf(stderr, "Invalid mode %s in mypopen\n", mode);
             exit(EXIT_FAILURE);
         }
 
         // Execute the command using the shell
         execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-        // If execl fails
+
         perror("execl");
         exit(EXIT_FAILURE);
     }
@@ -77,7 +77,7 @@ FILE *mypopen(const char *command, const char *mode) {
         return NULL;
     }
 
-    // Store the FILE* and associated PID in the popen_table
+    // Record the file pointer and PID
     int fd = fileno(fp);
     popen_table[fd].fp = fp;
     popen_table[fd].pid = pid;
@@ -91,26 +91,26 @@ int mypclose(FILE *fp) {
         return -1;
     }
 
-    // Get the file descriptor for the FILE* stream
+    // Get the file descriptor for the file pointer
     int fd = fileno(fp);
     if (fd < 0 || fd >= MAX_OPEN_STREAMS || popen_table[fd].fp != fp) {
         errno = EINVAL;
         return -1;
     }
 
-    // Get the PID of the child process
+    // Get the PID
     pid_t pid = popen_table[fd].pid;
 
-    // Close the FILE* stream
+    // Close the file
     fclose(fp);
 
-    // Wait for the child process to terminate
+    // Wait for the child process to exit
     int status;
     if (waitpid(pid, &status, 0) == -1) {
         return -1;
     }
 
-    // Clear the entry from the popen_table
+    // Release the entry from the popen_table
     popen_table[fd].fp = NULL;
     popen_table[fd].pid = -1;
 
