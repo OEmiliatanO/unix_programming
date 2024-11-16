@@ -28,7 +28,7 @@ static void bi_echo(char **argv) {
     int exppos = -1; // 1-base
     for (cnt = 0; argv[cnt] != NULL; ++cnt)
         if (strcmp(argv[cnt], "-n") == 0) {
-            if ((flag = sscanf(argv[cnt+1], "%d", &N)) <= 0) flag = 0;
+            if (argv[cnt+1] == NULL || (flag = sscanf(argv[cnt+1], "%d", &N)) <= 0) flag = 0;
             else { flag = 1; exppos = cnt; }
         }
 
