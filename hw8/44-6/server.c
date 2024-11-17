@@ -59,10 +59,10 @@ int main() {
         }
 
         snprintf(clientFIFO, CLI_FIFO_NAME_LEN, CLI_FIFO_TEMPLATE, (long) req.pid);
-        // bug is here
-        
+
         alarm(5);
         int clientFd = open(clientFIFO, O_WRONLY);
+		alarm(0); // cancel the timer
         if (skip) {
             skip = 0;
             continue;
