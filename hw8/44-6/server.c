@@ -10,6 +10,7 @@
 
 volatile sig_atomic_t skip;
 
+// handle the signal from alarm
 void handle_alarm(int sig) {
     (void)sig;
     skip = 1;
@@ -17,6 +18,7 @@ void handle_alarm(int sig) {
 }
 
 int main() {
+    // register the handler
     struct sigaction sa;
     sa.sa_handler = handle_alarm;
     sa.sa_flags = 0;
