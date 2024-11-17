@@ -1,59 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 #include "fifo_seqnum.h"
 
-char clientFifo[CLI_FIFO_NAME_LEN];
-
-static void removeFifo() {
-    unlink(clientFifo);
-}
+char clientMsg[CLI_MSG_NAME_LEN];
 
 int main(int argc, char **argv) {
-    snprintf(clientFifo, CLI_FIFO_NAME_LEN, CLI_FIFO_TEMPLATE, (long) getpid());
-    if (mkfifo(clientFifo, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        perror("mkfifo");
-        exit(EXIT_FAILURE);
-    }
-    if (atexit(removeFifo) != 0) {
-        perror("atexit");
-        exit(EXIT_FAILURE);
-    }
-    
-    struct request req;
+	key_t key = ftok(SERVER_MSG, 42);
+	if (key == -1) {
+		perror("ftok");
+		exit(EXIT_FAILURE);
+	}
+	int msgid = msgget(key, 0666 | IPC_CREAT);
+	if (msgid == -1) {
+		perror("msgget");
+		exit(EXIT_FAILURE);
+	}
+
+	struct request req;
+	req.mtype = 1;
     req.pid = getpid();
     req.seqLen = argc > 1 ? atoi(argv[1]) : 1;
-
-    int server_fd = open(SERVER_FIFO, O_WRONLY);
-    if (server_fd == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-
-    if (write(server_fd, &req, sizeof(struct request)) != sizeof(struct request)) {
-        perror("write");
-        exit(EXIT_FAILURE);
-    }
     
-    // Not to open the FIFO read end. Stall the server.
-    /*
-    int client_fd = open(clientFifo, O_RDONLY);
-    if (client_fd == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-    struct response resp;
-    if (read(client_fd, &resp, sizeof(struct response)) != sizeof(struct response)) {
-        perror("read");
+    // Only send request
+    if (msgsnd(msgid, &req, sizeof(req.pid) + sizeof(req.seqLen), 0) != 0) {
+        perror("msgsnd");
         exit(EXIT_FAILURE);
     }
 
-    printf("%d\n", resp.seqNum);
-    */
-    while (1);
     exit(EXIT_SUCCESS);
 }

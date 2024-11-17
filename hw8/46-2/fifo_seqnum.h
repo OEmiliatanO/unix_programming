@@ -1,5 +1,5 @@
-#define SERVER_MSG "/tmp/seqnum_sv"
-#define CLI_MSG_TEMPLATE "/tmp/seqnum_cl.%ld"
+#define SERVER_MSG "/tmp/seqnum_sv.msg"
+#define CLI_MSG_TEMPLATE "/tmp/seqnum_cl.%ld.msg"
 #define CLI_MSG_NAME_LEN (sizeof(CLI_MSG_TEMPLATE) + 20)
 
 struct request {

@@ -32,37 +32,43 @@ int main(int argc, char **argv) {
 		perror("msgget");
 		exit(EXIT_FAILURE);
 	}
+
 	struct request req;
-    
 	req.mtype = 1;
     req.pid = getpid();
     req.seqLen = argc > 1 ? atoi(argv[1]) : 1;
 
-	printf("send msg\n");
+    if (creat(clientMsg, 0666) == -1) {
+		perror("creat");
+		exit(EXIT_FAILURE);
+	}
+
     if (msgsnd(msgid, &req, sizeof(req.pid) + sizeof(req.seqLen), 0) != 0) {
         perror("msgsnd");
         exit(EXIT_FAILURE);
     }
-	printf("sent msg\n");
-
-	if (creat(clientMsg, 0666) == -1) {
-		perror("creat");
-		exit(EXIT_FAILURE);
-	}
 
 	key_t cli_key = ftok(clientMsg, 42);
 	if (cli_key == -1) {
 		perror("ftok");
 		exit(EXIT_FAILURE);
 	}
-	cli_msgid = msgget(key, 0666 | IPC_CREAT);
+	cli_msgid = msgget(cli_key, 0666 | IPC_CREAT);
 	if (cli_msgid == -1) {
 		perror("msgget");
 		exit(EXIT_FAILURE);
 	}
 
+	if (atexit(cleanup) == -1) {
+		perror("atexit");
+		exit(EXIT_FAILURE);
+	}
+
     struct response resp;
-    if (msgrcv(cli_msgid, &resp, sizeof(resp.seqNum), 0, 0) != sizeof(resp.seqNum)) {
+    ssize_t recv_size = msgrcv(cli_msgid, &resp, sizeof(resp.seqNum), 0, 0);
+    if (recv_size != sizeof(resp.seqNum)) {
+        fprintf(stderr, "recv size = %ld, sizeof response = %ld, errno = %d\n", recv_size, sizeof(struct response), errno);
+        fprintf(stderr, "%ld, %d\n", resp.mtype, resp.seqNum);
         perror("msgrcv");
         exit(EXIT_FAILURE);
     }
