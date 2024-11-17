@@ -95,11 +95,13 @@ int reader() {
 }
 
 int main() {
+	// Prepare the FIFO file
 	if (mkfifo(FIFO_NAME, 0666) == -1 && errno != EEXIST) {
 		perror("mkfifo");
 		exit(EXIT_FAILURE);
 	}
-
+	
+	// Register the cleanup function
 	if (atexit(removeFifo) == -1) {
 		perror("atexit");
 		exit(EXIT_FAILURE);
@@ -107,12 +109,15 @@ int main() {
 	
 	switch (fork()) {
 		case 0:
+			// Child
 			reader();
 			break;
 		case -1:
+			// Error
 			perror("fork");
 			exit(EXIT_FAILURE);
 		default:
+			// Parent
 			writer();
 	}
 
