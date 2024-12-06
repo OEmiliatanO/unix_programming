@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 	while(1) {
         memset(&tryit, 0, sizeof(tryit));
         printf("What word do you want : ");
-        if (scanf("%s", tryit.word) == -1) exit(0);
+        if (scanf("%s", tryit.word) == -1) break;
 		switch(lookup(&tryit,argv[1]) ) {
 			case FOUND:
 				printf("%s : %s",tryit.word,tryit.text);

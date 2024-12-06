@@ -38,14 +38,23 @@ int lookup(Dictrec * sought, const char * resource) {
 		/* Open the dictionary.
 		 * Fill in code. */
         fd = open(resource, O_RDONLY);
+        if (fd == -1) {
+            DIE("open");
+        }
 
 		/* Get record count for building the tree. */
 		filsiz = lseek(fd,0L,SEEK_END);
+        if (filsiz == (off_t)-1) {
+            DIE("lseek");
+        }
 		numrec = filsiz / sizeof(Dictrec);
 
 		/* mmap the data.
 		 * Fill in code. */
         table = (Dictrec *)mmap(NULL, filsiz, PROT_READ, MAP_SHARED, fd, 0);
+        if (table == MAP_FAILED) {
+            DIE("mmap");
+        }
 		close(fd);
 	}
     

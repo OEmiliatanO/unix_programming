@@ -14,13 +14,19 @@ int lookup(Dictrec * sought, const char * resource) {
 	static int sockfd;
 	static struct sockaddr_un server;
 	static int first_time = 1;
+    static Dictrec end;
 
 	if (first_time) {     /* connect to socket ; resource is socket name */
 		first_time = 0;
 
+        memset(&end, -1, sizeof(end));
+
 		/* Set up destination address.
 		 * Fill in code. */
         sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (sockfd == -1) {
+            DIE("socket");
+        }
 
 		/* Allocate socket. */
 		server.sun_family = AF_UNIX;
@@ -41,6 +47,8 @@ int lookup(Dictrec * sought, const char * resource) {
     if (recv(sockfd, (void *)sought, sizeof(Dictrec), 0) < 0) {
         DIE("recv");
     }
+
+    send(sockfd, (void *)sought, 0, 0);
 
 	if (strcmp(sought->text,"XXXX") != 0) {
 		return FOUND;

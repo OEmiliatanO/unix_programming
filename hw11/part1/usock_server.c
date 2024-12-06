@@ -25,11 +25,16 @@ int main(int argc, char **argv) {
       exit(errno);
     }
 
-    unlink(argv[2]);
+    if (unlink(argv[2]) == -1) {
+        DIE("unlink");
+    }
 
     /* Setup socket.
      * Fill in code. */
     sd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sd == -1) {
+        DIE("socket");
+    }
     
     /* Initialize address.
      * Fill in code. */
@@ -38,8 +43,12 @@ int main(int argc, char **argv) {
 
     /* Name and activate the socket.
      * Fill in code. */
-    bind(sd, (struct sockaddr *)&server,sizeof(server));
-    listen(sd, MAX_CLI_NUM);
+    if (bind(sd, (struct sockaddr *)&server,sizeof(server)) == -1) {
+        DIE("bind");
+    }
+    if (listen(sd, MAX_CLI_NUM) == -1) {
+        DIE("listen");
+    }
 
     /* main loop : accept connection; fork a child to have dialogue */
     for (;;) {
@@ -49,7 +58,9 @@ int main(int argc, char **argv) {
         socklen_t addrlen;
 
         cd = accept(sd, (struct sockaddr *) &client_addr, &addrlen);
-        //fprintf(stderr, "accept\n");
+        if (cd == -1) {
+            DIE("accept");
+        }
 
 		/* Handle new client in a subprocess. */
 		switch (fork()) {
@@ -59,20 +70,23 @@ int main(int argc, char **argv) {
 				close (sd); /* Rendezvous socket is for parent only. */
 				/* Get next request.
 				 * Fill in code. */
-                int recv_num;
-				while ((recv_num = recv(cd, (void *)&tryit, sizeof(Dictrec), 0))) {
+				while (recv(cd, (void *)&tryit, sizeof(Dictrec), 0) > 0) {
 
 					/* Lookup request. */
 					switch(lookup(&tryit,argv[1]) ) {
 						/* Write response back to client. */
 						case FOUND: 
 							/* Fill in code. */
-                            send(cd, (void *)&tryit, sizeof(Dictrec), 0);
+                            if (send(cd, (void *)&tryit, sizeof(Dictrec), 0) != sizeof(Dictrec)) {
+                                DIE("send");
+                            }
 							break;
 						case NOTFOUND: 
 							/* Fill in code. */
                             strcpy(tryit.text, "XXXX");
-                            send(cd, (void *)&tryit, sizeof(Dictrec), 0);
+                            if (send(cd, (void *)&tryit, sizeof(Dictrec), 0) != sizeof(Dictrec)) {
+                                DIE("send");
+                            }
 							break;
 						case UNAVAIL:
 							DIE(argv[1]);
