@@ -28,11 +28,13 @@ int lookup(Dictrec * sought, const char * resource) {
 		server.sin_family = AF_INET;
         server.sin_port = htons(PORT);
         server.sin_addr.s_addr = inet_addr(inet_ntoa( *((struct in_addr *)host->h_addr) ));
-        //server.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 		/* Allocate socket.
 		 * Fill in code. */
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd == -1) {
+            DIE("socket");
+        }
 
 		/* Connect to the server.
 		 * Fill in code. */
@@ -49,6 +51,8 @@ int lookup(Dictrec * sought, const char * resource) {
     if (recv(sockfd, (void *)sought, sizeof(Dictrec), 0) < 0) {
         DIE("recv");
     }
+
+    send(sockfd, (void *)sought, 0, 0);
 
 	if (strcmp(sought->text,"XXXX") != 0) {
 		return FOUND;

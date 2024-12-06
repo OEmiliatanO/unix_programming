@@ -31,6 +31,9 @@ int main(int argc, char **argv) {
 	/* Create the socket.
 	 * Fill in code. */
     sd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sd == -1) {
+        DIE("socket");
+    }
 
 	/* Initialize address.
 	 * Fill in code. */
@@ -40,8 +43,12 @@ int main(int argc, char **argv) {
 
 	/* Name and activate the socket.
 	 * Fill in code. */
-    bind(sd, (struct sockaddr *)&server,sizeof(server));
-    listen(sd, MAX_CLI_NUM);
+    if (bind(sd, (struct sockaddr *)&server,sizeof(server)) == -1) {
+        DIE("bind");
+    }
+    if (listen(sd, MAX_CLI_NUM) == -1) {
+        DIE("listen");
+    }
 
 	/* main loop : accept connection; fork a child to have dialogue */
 	for (;;) {
@@ -52,6 +59,9 @@ int main(int argc, char **argv) {
         socklen_t addrlen;
 
         cd = accept(sd, (struct sockaddr *) &client_addr, &addrlen);
+        if (cd == -1) {
+            DIE("accept");
+        }
 
 		/* Handle new client in a subprocess. */
 		switch (fork()) {
@@ -67,13 +77,17 @@ int main(int argc, char **argv) {
 						/* Write response back to the client. */
 						case FOUND:
 							/* Fill in code. */
-                            send(cd, (void *)&tryit, sizeof(Dictrec), 0);
+                            if (send(cd, (void *)&tryit, sizeof(Dictrec), 0) != sizeof(Dictrec)) {
+                                DIE("send");
+                            }
 							break;
 						case NOTFOUND:
 							/* Fill in code. */
                             strcpy(tryit.text, "XXXX");
-                            send(cd, (void *)&tryit, sizeof(Dictrec), 0);
-							 break;
+                            if (send(cd, (void *)&tryit, sizeof(Dictrec), 0) != sizeof(Dictrec)) {
+                                DIE("send");
+                            }
+							break;
 						case UNAVAIL:
 							DIE(argv[1]);
 					} /* end lookup switch */
