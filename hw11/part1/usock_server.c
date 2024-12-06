@@ -12,7 +12,7 @@
 #include <errno.h>
 #include "dict.h"
 
-#define MAX_CLI_NUM 10
+#define MAX_CLI_NUM 10000
 
 int main(int argc, char **argv) {
     struct sockaddr_un server;
