@@ -28,6 +28,9 @@ int main(int argc, char **argv) {
 	/* Create a UDP socket.
 	 * Fill in code. */
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) {
+        DIE("socket");
+    }
 
 	/* Initialize address.
 	 * Fill in code. */
@@ -56,13 +59,17 @@ int main(int argc, char **argv) {
 				case FOUND: 
 					/* Send response.
 					 * Fill in code. */
-                    sendto(sockfd, tryit, sizeof(Dictrec), 0, (struct sockaddr *)&client, siz);
+                    if (sendto(sockfd, tryit, sizeof(Dictrec), 0, (struct sockaddr *)&client, siz) != sizeof(Dictrec)) {
+                        DIE("sendto");
+                    }
 					break;
 				case NOTFOUND : 
 					/* Send response.
 					 * Fill in code. */
                     strcpy(tryit->text, "XXXX");
-                    sendto(sockfd, tryit, sizeof(Dictrec), 0, (struct sockaddr *)&client, siz);
+                    if (sendto(sockfd, tryit, sizeof(Dictrec), 0, (struct sockaddr *)&client, siz) != sizeof(Dictrec)) {
+                        DIE("sendto");
+                    }
 					break;
 				case UNAVAIL:
 					DIE(argv[1]);

@@ -31,13 +31,22 @@ int lookup(Dictrec * sought, const char * resource) {
 		/* Allocate a socket.
 		 * Fill in code. */
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sockfd == -1) {
+            DIE("socket");
+        }
 	}
 
 	/* Send a datagram & await reply
 	 * Fill in code. */
-    socklen_t siz = -1;
-    sendto(sockfd, (void *)sought, sizeof(Dictrec), 0, (struct sockaddr *)&server, sizeof(server));
-    recvfrom(sockfd, (void *)sought, sizeof(Dictrec), 0, (struct sockaddr *)&server, &siz);
+    socklen_t siz = sizeof(server);
+    if (sendto(sockfd, (void *)sought, sizeof(Dictrec), 0, (struct sockaddr *)&server, siz) != sizeof(Dictrec)) {
+        DIE("sendto");
+    }
+    if (recvfrom(sockfd, (void *)sought, sizeof(Dictrec), 0, (struct sockaddr *)&server, &siz) == -1) {
+        DIE("recvfrom");
+    }
+
+    sendto(sockfd, (void *)sought, 0, 0, (struct sockaddr *)&server, sizeof(server));
 
 	if (strcmp(sought->text,"XXXX") != 0) {
 		return FOUND;
